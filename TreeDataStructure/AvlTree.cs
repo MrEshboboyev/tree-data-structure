@@ -1,13 +1,14 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Text;
 
 namespace TreeDataStructure;
 
 /// <summary>
-/// A generic Binary Search Tree implementation with comprehensive functionality
+/// A self-balancing AVL tree implementation
 /// </summary>
 /// <typeparam name="T">The type of data stored in the tree, must implement IComparable</typeparam>
-public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
+public class AvlTree<T> : ITree<T> 
+    where T : IComparable<T>
 {
     private TreeNode<T>? _root;
     private int _count;
@@ -21,16 +22,16 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
     /// </summary>
     public int Height => GetHeight(_root);
 
-    public BinarySearchTree()
+    public AvlTree()
     {
         _root = null;
         _count = 0;
     }
 
-    public BinarySearchTree(IEnumerable<T> values) : this()
+    public AvlTree(IEnumerable<T> values) : this()
     {
-        if (values == null) throw new ArgumentNullException(nameof(values));
-        
+        ArgumentNullException.ThrowIfNull(values);
+
         foreach (var value in values)
         {
             Insert(value);
@@ -40,7 +41,6 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
     public void Insert(T value)
     {
         _root = InsertRecursive(_root, null, value);
-        _count++;
     }
 
     private TreeNode<T> InsertRecursive(TreeNode<T> current, TreeNode<T> parent, T value)
@@ -48,6 +48,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         if (current == null)
         {
             var newNode = new TreeNode<T>(value) { Parent = parent };
+            _count++;
             return newNode;
         }
 
@@ -62,29 +63,22 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         }
         else
         {
-            // Value already exists, decrement count as we incremented it before calling
-            _count--;
+            // Value already exists, don't increment count
             throw new InvalidOperationException($"Value {value} already exists in the tree.");
         }
 
-        return current;
+        // Update height and balance the tree
+        return Balance(current);
     }
 
     public bool Remove(T value)
     {
-        if (_root == null) return false;
-
-        var result = RemoveRecursive(_root, value);
-        if (result != null)
-        {
-            _root = result;
-            _count--;
-            return true;
-        }
-        return false;
+        int initialCount = _count;
+        _root = RemoveRecursive(_root, value);
+        return _count != initialCount;
     }
 
-    private TreeNode<T> RemoveRecursive(TreeNode<T> current, T value)
+    private TreeNode<T>? RemoveRecursive(TreeNode<T> current, T value)
     {
         if (current == null) return null;
 
@@ -92,40 +86,42 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         if (comparison < 0)
         {
             current.Left = RemoveRecursive(current.Left, value);
-            return current;
         }
-        if (comparison > 0)
+        else if (comparison > 0)
         {
             current.Right = RemoveRecursive(current.Right, value);
-            return current;
+        }
+        else
+        {
+            // Node to delete found
+            if (current.Left == null && current.Right == null)
+            {
+                _count--;
+                return null;
+            }
+            if (current.Left == null)
+            {
+                _count--;
+                var rightChild = current.Right;
+                rightChild.Parent = current.Parent;
+                return rightChild;
+            }
+            if (current.Right == null)
+            {
+                _count--;
+                var leftChild = current.Left;
+                leftChild.Parent = current.Parent;
+                return leftChild;
+            }
+
+            // Has both children - find inorder successor (smallest in right subtree)
+            T successorValue = FindMin(current.Right).Data;
+            current.Data = successorValue;
+            current.Right = RemoveRecursive(current.Right, successorValue);
         }
 
-        // Node to delete found
-        if (current.Left == null && current.Right == null)
-        {
-            // Leaf node
-            return null;
-        }
-        if (current.Left == null)
-        {
-            // Has only right child
-            var rightChild = current.Right;
-            rightChild.Parent = current.Parent;
-            return rightChild;
-        }
-        if (current.Right == null)
-        {
-            // Has only left child
-            var leftChild = current.Left;
-            leftChild.Parent = current.Parent;
-            return leftChild;
-        }
-
-        // Has both children - find inorder successor (smallest in right subtree)
-        T successorValue = FindMin(current.Right).Data;
-        current.Data = successorValue;
-        current.Right = RemoveRecursive(current.Right, successorValue);
-        return current;
+        // Update height and balance the tree
+        return Balance(current);
     }
 
     public bool Contains(T value)
@@ -329,6 +325,103 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
     {
         if (node == null) return 0;
         return 1 + CountNodes(node.Left) + CountNodes(node.Right);
+    }
+
+    private TreeNode<T> Balance(TreeNode<T> node)
+    {
+        if (node == null) return null;
+
+        // Update height
+        int leftHeight = GetHeight(node.Left);
+        int rightHeight = GetHeight(node.Right);
+        node.Data = node.Data; // Just to use the node for the update
+
+        // Get balance factor
+        int balanceFactor = leftHeight - rightHeight;
+
+        // Left heavy
+        if (balanceFactor > 1)
+        {
+            // Left-Right case
+            if (GetHeight(node.Left.Left) < GetHeight(node.Left.Right))
+            {
+                node.Left = RotateLeft(node.Left);
+            }
+            // Left-Left case
+            return RotateRight(node);
+        }
+
+        // Right heavy
+        if (balanceFactor < -1)
+        {
+            // Right-Left case
+            if (GetHeight(node.Right.Right) < GetHeight(node.Right.Left))
+            {
+                node.Right = RotateRight(node.Right);
+            }
+            // Right-Right case
+            return RotateLeft(node);
+        }
+
+        return node;
+    }
+
+    private TreeNode<T> RotateRight(TreeNode<T> y)
+    {
+        var x = y.Left;
+        var T2 = x.Right;
+
+        // Perform rotation
+        x.Right = y;
+        y.Left = T2;
+
+        // Update parent references
+        if (y.Parent != null)
+        {
+            if (y.Parent.Left == y)
+                y.Parent.Left = x;
+            else
+                y.Parent.Right = x;
+        }
+        
+        if (T2 != null) T2.Parent = y;
+        x.Parent = y.Parent;
+        y.Parent = x;
+
+        // Update root if needed
+        if (x.Parent == null)
+            _root = x;
+
+        return x;
+    }
+
+    private TreeNode<T> RotateLeft(TreeNode<T> x)
+    {
+        var y = x.Right;
+        var T2 = y.Left;
+
+        // Perform rotation
+        y.Left = x;
+        x.Right = T2;
+
+        // Update parent references
+        if (x.Parent != null)
+        {
+            if (x.Parent.Left == x)
+                x.Parent.Left = y;
+            else
+                x.Parent.Right = y;
+        }
+        
+        if (T2 != null) T2.Parent = x;
+        y.Parent = x.Parent;
+        x.Parent = y;
+
+        // Update root if needed
+        if (y.Parent == null)
+            _root = y;
+
+        return y;
     }
 
     private int GetHeight(TreeNode<T> node)
