@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Text;
+﻿using System.Text;
 
 namespace TreeDataStructure;
 
@@ -7,11 +6,8 @@ namespace TreeDataStructure;
 /// A generic Binary Search Tree implementation with comprehensive functionality
 /// </summary>
 /// <typeparam name="T">The type of data stored in the tree, must implement IComparable</typeparam>
-public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
+public class BinarySearchTree<T> : AbstractTree<T> where T : IComparable<T>
 {
-    private TreeNode<T>? _root;
-    private int _count;
-
     public TreeNode<T> Root => _root;
     public int Count => _count;
     public bool IsEmpty => _root == null;
@@ -37,7 +33,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         }
     }
 
-    public void Insert(T value)
+    public override void Insert(T value)
     {
         _root = InsertRecursive(_root, null, value);
         _count++;
@@ -70,7 +66,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return current;
     }
 
-    public bool Remove(T value)
+    public override bool Remove(T value)
     {
         if (_root == null) return false;
 
@@ -128,12 +124,12 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return current;
     }
 
-    public bool Contains(T value)
+    public override bool Contains(T value)
     {
         return Find(value) != null;
     }
 
-    public TreeNode<T> Find(T value)
+    public override TreeNode<T> Find(T value)
     {
         return FindRecursive(_root, value);
     }
@@ -148,13 +144,13 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return FindRecursive(current.Right, value);
     }
 
-    public void Clear()
+    public override void Clear()
     {
         _root = null;
         _count = 0;
     }
 
-    public T GetMin()
+    public override T GetMin()
     {
         if (_root == null) throw new InvalidOperationException("Tree is empty.");
         return FindMin(_root).Data;
@@ -169,7 +165,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return node;
     }
 
-    public T GetMax()
+    public override T GetMax()
     {
         if (_root == null) throw new InvalidOperationException("Tree is empty.");
         return FindMax(_root).Data;
@@ -184,7 +180,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return node;
     }
 
-    public IEnumerable<T> InOrderTraversal()
+    public override IEnumerable<T> InOrderTraversal()
     {
         var result = new List<T>();
         InOrderTraversalRecursive(_root, result);
@@ -201,7 +197,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         }
     }
 
-    public IEnumerable<T> PreOrderTraversal()
+    public override IEnumerable<T> PreOrderTraversal()
     {
         var result = new List<T>();
         PreOrderTraversalRecursive(_root, result);
@@ -218,7 +214,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         }
     }
 
-    public IEnumerable<T> PostOrderTraversal()
+    public override IEnumerable<T> PostOrderTraversal()
     {
         var result = new List<T>();
         PostOrderTraversalRecursive(_root, result);
@@ -235,7 +231,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         }
     }
 
-    public IEnumerable<T> LevelOrderTraversal()
+    public override IEnumerable<T> LevelOrderTraversal()
     {
         var result = new List<T>();
         if (_root == null) return result;
@@ -255,7 +251,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return result;
     }
 
-    public string Serialize()
+    public override string Serialize()
     {
         if (_root == null) return "";
         return SerializeRecursive(_root);
@@ -270,7 +266,7 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return sb.ToString();
     }
 
-    public void Deserialize(string data)
+    public override void Deserialize(string data)
     {
         if (string.IsNullOrEmpty(data))
         {
@@ -331,19 +327,46 @@ public class BinarySearchTree<T> : ITree<T> where T : IComparable<T>
         return 1 + CountNodes(node.Left) + CountNodes(node.Right);
     }
 
-    private int GetHeight(TreeNode<T> node)
+    private new int GetHeight(TreeNode<T> node)
     {
         if (node == null) return 0;
         return 1 + Math.Max(GetHeight(node.Left), GetHeight(node.Right));
     }
 
-    public IEnumerator<T> GetEnumerator()
+    public override ITree<T> Clone()
     {
-        return InOrderTraversal().GetEnumerator();
+        var clonedTree = new BinarySearchTree<T>();
+        if (_root != null)
+        {
+            clonedTree._root = CloneRecursive(_root);
+            clonedTree._count = _count;
+        }
+        return clonedTree;
+    }
+    
+    private TreeNode<T> CloneRecursive(TreeNode<T> node)
+    {
+        if (node == null) return null;
+
+        var clonedNode = new TreeNode<T>(node.Data);
+        
+        if (node.Left != null)
+        {
+            clonedNode.Left = CloneRecursive(node.Left);
+            if (clonedNode.Left != null) clonedNode.Left.Parent = clonedNode;
+        }
+        
+        if (node.Right != null)
+        {
+            clonedNode.Right = CloneRecursive(node.Right);
+            if (clonedNode.Right != null) clonedNode.Right.Parent = clonedNode;
+        }
+
+        return clonedNode;
     }
 
-    IEnumerator IEnumerable.GetEnumerator()
+    public override IEnumerator<T> GetEnumerator()
     {
-        return GetEnumerator();
+        return InOrderTraversal().GetEnumerator();
     }
 }

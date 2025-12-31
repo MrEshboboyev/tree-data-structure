@@ -33,6 +33,12 @@ public interface ITree<T> : IEnumerable<T>
     void Insert(T value);
     
     /// <summary>
+    /// Inserts multiple values into the tree
+    /// </summary>
+    /// <param name="values">The values to insert</param>
+    void InsertRange(IEnumerable<T> values);
+    
+    /// <summary>
     /// Removes a value from the tree
     /// </summary>
     /// <param name="value">The value to remove</param>
@@ -83,6 +89,12 @@ public interface ITree<T> : IEnumerable<T>
     IEnumerable<T> LevelOrderTraversal();
     
     /// <summary>
+    /// Performs reverse in-order traversal (right-root-left)
+    /// </summary>
+    /// <returns>Enumeration of values in reverse in-order sequence</returns>
+    IEnumerable<T> ReverseInOrderTraversal();
+    
+    /// <summary>
     /// Gets the minimum value in the tree
     /// </summary>
     /// <returns>The minimum value, or default(T) if tree is empty</returns>
@@ -95,6 +107,20 @@ public interface ITree<T> : IEnumerable<T>
     T GetMax();
     
     /// <summary>
+    /// Gets the depth of a specific value in the tree
+    /// </summary>
+    /// <param name="value">The value to find the depth for</param>
+    /// <returns>The depth of the value, or -1 if not found</returns>
+    int GetDepth(T value);
+    
+    /// <summary>
+    /// Gets all values at a specific level in the tree
+    /// </summary>
+    /// <param name="level">The level to retrieve values from</param>
+    /// <returns>Enumeration of values at the specified level</returns>
+    IEnumerable<T> GetValuesAtLevel(int level);
+    
+    /// <summary>
     /// Serializes the tree to a string representation
     /// </summary>
     /// <returns>String representation of the tree</returns>
@@ -105,4 +131,65 @@ public interface ITree<T> : IEnumerable<T>
     /// </summary>
     /// <param name="data">The string representation to deserialize from</param>
     void Deserialize(string data);
+    
+    /// <summary>
+    /// Clones the tree structure
+    /// </summary>
+    /// <returns>A deep copy of the tree</returns>
+    ITree<T> Clone();
+    
+    /// <summary>
+    /// Checks if the tree is balanced
+    /// </summary>
+    /// <returns>True if the tree is balanced, false otherwise</returns>
+    bool IsBalanced();
+    
+    /// <summary>
+    /// Gets the path from root to a specific value
+    /// </summary>
+    /// <param name="value">The value to find the path for</param>
+    /// <returns>Enumeration of values representing the path from root to the target value</returns>
+    IEnumerable<T> GetPathToValue(T value);
+    
+    /// <summary>
+    /// Performs a breadth-first search for a value
+    /// </summary>
+    /// <param name="value">The value to search for</param>
+    /// <returns>The node containing the value, or null if not found</returns>
+    TreeNode<T> BreadthFirstSearch(T value);
+    
+    /// <summary>
+    /// Performs a depth-first search for a value
+    /// </summary>
+    /// <param name="value">The value to search for</param>
+    /// <returns>The node containing the value, or null if not found</returns>
+    TreeNode<T> DepthFirstSearch(T value);
+    
+    /// <summary>
+    /// Gets the lowest common ancestor of two values
+    /// </summary>
+    /// <param name="value1">First value</param>
+    /// <param name="value2">Second value</param>
+    /// <returns>The lowest common ancestor node, or null if either value is not found</returns>
+    TreeNode<T> GetLowestCommonAncestor(T value1, T value2);
+    
+    /// <summary>
+    /// Checks if the tree is a valid binary search tree
+    /// </summary>
+    /// <returns>True if the tree is a valid BST, false otherwise</returns>
+    bool IsValidBST();
+    
+    /// <summary>
+    /// Gets the kth smallest element in the tree
+    /// </summary>
+    /// <param name="k">The index of the element to find (1-indexed)</param>
+    /// <returns>The kth smallest element</returns>
+    T GetKthSmallest(int k);
+    
+    /// <summary>
+    /// Gets the kth largest element in the tree
+    /// </summary>
+    /// <param name="k">The index of the element to find (1-indexed)</param>
+    /// <returns>The kth largest element</returns>
+    T GetKthLargest(int k);
 }

@@ -17,6 +17,20 @@ public class TreeTests
     }
 
     [Fact]
+    public void BinarySearchTree_InsertRange_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        bst.InsertRange(values);
+
+        Assert.Equal(7, bst.Count);
+        foreach (int value in values)
+        {
+            Assert.True(bst.Contains(value));
+        }
+    }
+
+    [Fact]
     public void BinarySearchTree_InOrderTraversal_ReturnsSortedValues()
     {
         var bst = new BinarySearchTree<int>();
@@ -28,6 +42,22 @@ public class TreeTests
 
         var result = bst.InOrderTraversal().ToArray();
         var expected = new[] { 20, 30, 40, 50, 60, 70, 80 };
+
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void BinarySearchTree_ReverseInOrderTraversal_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        var result = bst.ReverseInOrderTraversal().ToArray();
+        var expected = new[] { 80, 70, 60, 50, 40, 30, 20 }; // Reverse order
 
         Assert.Equal(expected, result);
     }
@@ -179,6 +209,177 @@ public class TreeTests
     }
 
     [Fact]
+    public void BinarySearchTree_GetDepth_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        Assert.Equal(0, bst.GetDepth(50)); // Root
+        Assert.Equal(1, bst.GetDepth(30)); // Level 1
+        Assert.Equal(2, bst.GetDepth(20)); // Level 2
+    }
+
+    [Fact]
+    public void BinarySearchTree_GetValuesAtLevel_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        var level0 = bst.GetValuesAtLevel(0).ToArray();
+        var level1 = bst.GetValuesAtLevel(1).ToArray();
+        var level2 = bst.GetValuesAtLevel(2).ToArray();
+
+        Assert.Equal(new[] { 50 }, level0);
+        Assert.Equal(new[] { 30, 70 }, level1);
+        Assert.Equal(new[] { 20, 40, 60, 80 }, level2);
+    }
+
+    [Fact]
+    public void BinarySearchTree_GetPathToValue_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        var path = bst.GetPathToValue(40).ToArray();
+        var expected = new[] { 50, 30, 40 };
+
+        Assert.Equal(expected, path);
+    }
+
+    [Fact]
+    public void BinarySearchTree_BreadthFirstSearch_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        var node = bst.BreadthFirstSearch(40);
+        Assert.NotNull(node);
+        Assert.Equal(40, node.Data);
+    }
+
+    [Fact]
+    public void BinarySearchTree_DepthFirstSearch_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        var node = bst.DepthFirstSearch(40);
+        Assert.NotNull(node);
+        Assert.Equal(40, node.Data);
+    }
+
+    [Fact]
+    public void BinarySearchTree_GetLowestCommonAncestor_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        var lca = bst.GetLowestCommonAncestor(20, 40);
+        Assert.NotNull(lca);
+        Assert.Equal(30, lca.Data);
+    }
+
+    [Fact]
+    public void BinarySearchTree_IsValidBST_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        Assert.True(bst.IsValidBST());
+    }
+
+    [Fact]
+    public void BinarySearchTree_GetKthSmallest_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        Assert.Equal(20, bst.GetKthSmallest(1));
+        Assert.Equal(30, bst.GetKthSmallest(2));
+        Assert.Equal(40, bst.GetKthSmallest(3));
+        Assert.Equal(80, bst.GetKthSmallest(7));
+    }
+
+    [Fact]
+    public void BinarySearchTree_GetKthLargest_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        Assert.Equal(80, bst.GetKthLargest(1));
+        Assert.Equal(70, bst.GetKthLargest(2));
+        Assert.Equal(60, bst.GetKthLargest(3));
+        Assert.Equal(20, bst.GetKthLargest(7));
+    }
+
+    [Fact]
+    public void BinarySearchTree_Clone_WorksCorrectly()
+    {
+        var originalTree = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            originalTree.Insert(value);
+        }
+
+        var clonedTree = (BinarySearchTree<int>)originalTree.Clone();
+        
+        Assert.Equal(originalTree.InOrderTraversal().ToArray(), clonedTree.InOrderTraversal().ToArray());
+        Assert.Equal(originalTree.Count, clonedTree.Count);
+        Assert.Equal(originalTree.Height, clonedTree.Height);
+    }
+
+    [Fact]
+    public void BinarySearchTree_IsBalanced_WorksCorrectly()
+    {
+        var bst = new BinarySearchTree<int>();
+        int[] values = [50, 30, 70, 20, 40];
+        foreach (int value in values)
+        {
+            bst.Insert(value);
+        }
+
+        // Regular BST might not be balanced
+        Assert.True(bst.IsBalanced()); // For small trees it's likely balanced
+    }
+
+    [Fact]
     public void AvlTree_InsertMaintainsBalance()
     {
         var avl = new AvlTree<int>();
@@ -209,6 +410,80 @@ public class TreeTests
 
         // Height should remain reasonable after removal
         Assert.True(finalHeight <= initialHeight || finalHeight <= 5);
+    }
+
+    [Fact]
+    public void AvlTree_IsBalanced_WorksCorrectly()
+    {
+        var avl = new AvlTree<int>();
+        int[] values = [1, 2, 3, 4, 5, 6, 7];
+        foreach (int value in values)
+        {
+            avl.Insert(value);
+        }
+
+        Assert.True(avl.IsBalanced()); // AVL trees are always balanced
+    }
+
+    [Fact]
+    public void RedBlackTree_InsertAndTraversal_WorksCorrectly()
+    {
+        var rbTree = new RedBlackTree<int>();
+        int[] values = [10, 20, 30, 15, 25, 5, 1];
+        foreach (int value in values)
+        {
+            rbTree.Insert(value);
+        }
+
+        var result = rbTree.InOrderTraversal().ToArray();
+        var expected = new[] { 1, 5, 10, 15, 20, 25, 30 };
+
+        Assert.Equal(expected, result);
+        Assert.Equal(7, rbTree.Count);
+    }
+
+    [Fact]
+    public void RedBlackTree_IsBalanced_WorksCorrectly()
+    {
+        var rbTree = new RedBlackTree<int>();
+        int[] values = [10, 20, 30, 15, 25, 5, 1];
+        foreach (int value in values)
+        {
+            rbTree.Insert(value);
+        }
+
+        Assert.True(rbTree.IsBalanced()); // Red-Black trees are approximately balanced
+    }
+
+    [Fact]
+    public void BTree_InsertAndTraversal_WorksCorrectly()
+    {
+        var bTree = new BTree<int>(3); // Minimum degree of 3
+        int[] values = [10, 20, 5, 6, 12, 30, 7];
+        foreach (int value in values)
+        {
+            bTree.Insert(value);
+        }
+
+        var result = bTree.InOrderTraversal().ToArray();
+        Array.Sort(values);
+        Assert.Equal(values, result);
+        Assert.Equal(7, bTree.Count);
+    }
+
+    [Fact]
+    public void BTree_GetKthSmallest_WorksCorrectly()
+    {
+        var bTree = new BTree<int>(3);
+        int[] values = [50, 30, 70, 20, 40, 60, 80];
+        foreach (int value in values)
+        {
+            bTree.Insert(value);
+        }
+
+        Assert.Equal(20, bTree.GetKthSmallest(1));
+        Assert.Equal(30, bTree.GetKthSmallest(2));
+        Assert.Equal(80, bTree.GetKthSmallest(7));
     }
 
     [Fact]
